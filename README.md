@@ -8,3 +8,6 @@ Features
 
 In order to get verified you have to provide your Discordtag in your Soonaverseprofile holding the NFT.
 The List of NFT-Holders and the treasury gets updated every few minutes.
+
+additional requirements -> built version of https://github.com/legolars1337/soonaverse-lib 
+because of the added getDiscordByEthAddr function.

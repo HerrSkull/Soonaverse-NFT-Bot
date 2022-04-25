@@ -17,3 +17,7 @@ Discord Bot permissions requirements:
 * Manage roles
 * Bot needs "higher" permissions than the roles it grants
 * If the server admin konto is 2FA enabled, the botowner account needs to be too
+
+Missing:
+* Error handling
+* ...

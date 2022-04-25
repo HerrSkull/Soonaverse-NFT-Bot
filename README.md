@@ -11,3 +11,9 @@ The List of NFT-Holders and the treasury gets updated every few minutes.
 
 additional requirements -> built version of https://github.com/legolars1337/soonaverse-lib 
 because of the added getDiscordByEthAddr function.
+
+Discord Bot permissions requirements:
+* Server member intent
+* Manage roles
+* Bot needs "higher" permissions than the roles it grants
+* If the server admin konto is 2FA enabled, the botowner account needs to be too

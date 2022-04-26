@@ -81,7 +81,11 @@ function updateCurrentHolders() {
         }
         let holdertags = new Array();
         await Promise.all(chunked.map(async (addresses) => {
-            const discordtags = await soon.getDiscordbyEthAddr(addresses);
+            const members = await soon.getMemberByIds(addresses);
+            let discordtags = new Array();
+            members.forEach( (member) => {
+                discordtags.push(member);
+            });
             const filtered = discordtags.filter(n => n);
             filtered.forEach((discordTag) => holdertags.push(discordTag));
         }));

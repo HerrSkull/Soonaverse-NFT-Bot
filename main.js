@@ -84,7 +84,7 @@ function updateCurrentHolders() {
             const members = await soon.getMemberByIds(addresses);
             let discordtags = new Array();
             members.forEach( (member) => {
-                discordtags.push(member);
+                discordtags.push(member.discord);
             });
             const filtered = discordtags.filter(n => n);
             filtered.forEach((discordTag) => holdertags.push(discordTag));

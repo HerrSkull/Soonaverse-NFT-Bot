@@ -1,4 +1,4 @@
-# ApeBot
+# Soonaverse-NFT-Bot
 
 Features
 * Track funds of a Hot & Cold Wallet
@@ -8,9 +8,6 @@ Features
 
 In order to get verified you have to provide your Discordtag in your Soonaverseprofile holding the NFT.
 The List of NFT-Holders and the treasury gets updated every few minutes.
-
-additional requirements -> built version of https://github.com/legolars1337/soonaverse-lib 
-because of the added getDiscordByEthAddr function.
 
 Discord Bot permissions requirements:
 * Server member intent

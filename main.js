@@ -1,56 +1,24 @@
-import { BOT_TOKEN, TREASURY_HOTWALLET, COLLECTION_ID, TREASURY_ADDRESS, ROLE_ID, GUILD_ID, API_ADDRESS, GRANT_ROLES_TO_NFT_HOLDERS, SHOW_TREASURY_INFO} from "./config.js";
-import { Client, Intents, RoleManager } from "discord.js";
-import fetch from "node-fetch";
+import { BOT_TOKEN, COLLECTION_ID, GUILD_ID, API_ADDRESS, GRANT_ROLES_TO_NFT_HOLDERS, SHOW_TREASURY_INFO, ROLES_TABLE, WALLET_LIST} from "./config.js";
+import { Client, Intents} from "discord.js";
 import { Soon } from "soonaverse";
+import  { TreasuryManager } from "./modules/treasuryManager.js";
+import { NftRoleManager } from "./modules/nftRoleManager.js";
 
 let intents = new Intents(Intents.NON_PRIVILEGED);
+
 intents.add('GUILDS');
 intents.add('GUILD_MEMBERS');
 
 const client = new Client({intents : intents});
 const soon = new Soon();
 
-var treasure = 0;
-var NFTValue = 0;
-var nickname;
-var status;
 var interval = 180 * 1000;
 var timeout = 0;
-var owner_addresses = new Array();
+var treasuryManager = new TreasuryManager(API_ADDRESS, WALLET_LIST);
+var nftRoleManager = new NftRoleManager(COLLECTION_ID, soon, client, ROLES_TABLE, GUILD_ID);
 
-function getTreasure(api, addr) {
-    return fetch(api + addr)
-        .then(res => {
-            return res.json()
-        })
-        .then(data => {
-            return data["data"]["balance"]/1000000
-        })
-}
-
-function getNFTValue() {
-    return treasure/1074
-}
-
-function getTreasuryInfos() {
-    getTreasure(API_ADDRESS, TREASURY_ADDRESS).then(value => {
-        treasure = value;
-        getTreasure(API_ADDRESS, TREASURY_HOTWALLET).then(value => {
-            treasure += value;
-            nickname = "Treasury " + (Math.round( (((treasure)/1000) + Number.EPSILON) * 100 ) / 100) + " Gi";
-            NFTValue = getNFTValue();
-            status = "NFT floor : " + (Math.round((NFTValue + Number.EPSILON) * 100) / 100) + "Mi";   
-            try {
-                client.user.setActivity(status, {type: "WATCHING"});
-                console.log(status);
-                client.user.setUsername(nickname);
-                console.log(nickname);
-            } catch (error) {
-                console.debug(error);
-                update();
-            }
-        });
-    });
+function round(input){
+    return (Math.round((input + Number.EPSILON) * 100) / 100);
 }
 
 function update() {
@@ -59,79 +27,46 @@ function update() {
         console.log("TIMEOUT: " + timeout);
         timeout = 0;
     } else {
-        if(GRANT_ROLES_TO_NFT_HOLDERS) { updateCurrentHolders() };
-        if(SHOW_TREASURY_INFO) { getTreasuryInfos() };
+        if(GRANT_ROLES_TO_NFT_HOLDERS) { nftRoleManager.updateCurrentHolders() };
+        if(SHOW_TREASURY_INFO) { updateAppearance() };
         setTimeout(update, interval);
     }
 }
 
-function updateCurrentHolders() {
-    soon.getNftsByCollections([COLLECTION_ID]).then(async (obj) => {
-        for(var i = 0; i < obj.length; i++)
-        {
-            if(owner_addresses.indexOf(obj[i]["owner"]) === -1){
-                owner_addresses.push(obj[i]["owner"]);
-            }
-        }
-        
-        const chunkSize = 10;
-        let chunked = new Array();
-        for (let i = 0; i < owner_addresses.length; i += chunkSize) {
-            chunked.push(owner_addresses.slice(i, i + chunkSize));
-        }
-        let holdertags = new Array();
-        await Promise.all(chunked.map(async (addresses) => {
-            const members = await soon.getMemberByIds(addresses);
-            let discordtags = new Array();
-            members.forEach( (member) => {
-                discordtags.push(member);
-            });
-            const filtered = discordtags.filter(n => n);
-            filtered.forEach((discordTag) => holdertags.push(discordTag));
-        }));
-        syncRoles(holdertags);
+
+async function updateAppearance(){
+    let t = await treasuryManager.getTreasuryInfos();
+    let nickname = "Treasury " + round(t/1000) + " Gi";
+    let status = "NFT floor : " + round(treasuryManager.getNFTValue()) + "Mi";
+    client.guilds.fetch(GUILD_ID).then(async (guild) => {
+        guild.me.setNickname(nickname);
     });
+    try {
+        client.user.setActivity(status, {type: "WATCHING"});
+        console.log(status + " " + nickname);
+    } catch (error) {
+        console.debug(error);
+    }
 }
 
-function syncRoles(discordtags){
-        client.guilds.fetch(GUILD_ID).then(async (guild) => {
-            guild.members.fetch().then(async () => {
-                let membersWithRole = (guild.roles.cache.get(ROLE_ID)).members;
-                membersWithRole.forEach( (member) => {
-                if(discordtags.includes(member.user.tag)){
-                    discordtags = discordtags.filter(e => e !== member.user.tag );
-                } else {
-                    member.roles.remove(ROLE_ID).then( (member) => {
-                        console.log(member.user.tag + " - removed");
-                    })
-                }});
-                
-                guild.members.fetch().then( (members) => {
-                    discordtags.forEach( (discordtag) => {
-                        members.forEach( (member) => {
-                            if(member.user.tag == discordtag){
-                                member.roles.add(ROLE_ID, "NFT-Owner").then( (member) => {
-                                    console.log(member.user.tag + " - added");
-                                })
-                            }
-                        })
-                    })
-                    
-                }).catch((err) => console.log);
-            })
-        })
-            
-}
 
-client.on("ready", () => {
+client.once("ready", () => {
+    ROLES_TABLE.sort((a,b) => {
+		return a.reqNFTs - b.reqNFTs
+	})
     update();
 });
 
+
 client.on("rateLimit", (limit) => {
     timeout = limit.timeout;
-    console.log(timeout);
+    console.log("[TIMEOUT]: " + timeout);
 });
 client.on("warn", (warning) => console.log(warning));
 client.on("error", console.error);
+
+process.on('unhandledRejection', error => {
+    console.log('Error:', error);
+});
 
 client.login(BOT_TOKEN);

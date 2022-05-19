@@ -1,6 +1,6 @@
 {
-  "name": "apebot",
-  "version": "1.0.0",
+  "name": "soonaverse-nft-bot",
+  "version": "1.1.0",
   "description": "",
   "main": "main.js",
   "scripts": {
@@ -10,7 +10,7 @@
   "license": "GPL-3.0",
   "dependencies": {
     "discord.js": "^13.6.0",
-    "soonaverse": "^0.1.11"
+    "soonaverse": "^0.1.14"
   },
-  "type" : "module"
+  "type": "module"
 }

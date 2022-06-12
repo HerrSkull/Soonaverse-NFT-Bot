@@ -1,4 +1,4 @@
-import { BOT_TOKEN, COLLECTION_ID, GUILD_ID, API_ADDRESS, GRANT_ROLES_TO_NFT_HOLDERS, SHOW_TREASURY_INFO, ROLES_TABLE, WALLET_LIST} from "./config.js";
+import { BOT_TOKEN, COLLECTION_IDS, GUILD_ID, API_ADDRESS, GRANT_ROLES_TO_NFT_HOLDERS, SHOW_TREASURY_INFO, ROLES_TABLE, WALLET_LIST} from "./config.js";
 import { Client, Intents} from "discord.js";
 import { Soon } from "soonaverse";
 import  { TreasuryManager } from "./modules/treasuryManager.js";
@@ -15,7 +15,7 @@ const soon = new Soon();
 var interval = 180 * 1000;
 var timeout = 0;
 var treasuryManager = new TreasuryManager(API_ADDRESS, WALLET_LIST);
-var nftRoleManager = new NftRoleManager(COLLECTION_ID, soon, client, ROLES_TABLE, GUILD_ID);
+var nftRoleManager = new NftRoleManager(COLLECTION_IDS, soon, client, ROLES_TABLE, GUILD_ID);
 
 function round(input){
     return (Math.round((input + Number.EPSILON) * 100) / 100);

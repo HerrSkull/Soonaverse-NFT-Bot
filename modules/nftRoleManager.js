@@ -1,6 +1,6 @@
 export class NftRoleManager {
-    constructor(collectionId, soon, client, rolesTable, guildId){
-        this.collectionId = collectionId;
+    constructor(collectionIds, soon, client, rolesTable, guildId){
+        this.collectionIds = collectionIds;
         this.soon = soon;
         this.client = client;
         this.rolesTable = rolesTable;
@@ -9,7 +9,7 @@ export class NftRoleManager {
     }
 
     updateCurrentHolders() {
-        this.soon.getNftsByCollections([this.collectionId]).then(async (obj) => {
+        this.soon.getNftsByCollections(this.collectionIds).then(async (obj) => {
             let ethNftCount = new Map();
             let owner_addresses = new Array();
             for(var i = 0; i < obj.length; i++) 
@@ -23,20 +23,17 @@ export class NftRoleManager {
                 }
             }
             
-            const chunkSize = 10;
             let chunked = new Array();
             for (let i = 0; i < owner_addresses.length; i += chunkSize) {
                 chunked.push(owner_addresses.slice(i, i + chunkSize));
             }
             
-            let discordT = new Array();
             const nftHolders = new Map();
             await Promise.all(chunked.map(async (addresses) => {
                 const members = await this.soon.getMemberByIds(addresses);
                 members.forEach( (member) => {
                     if(member.discord){
                         nftHolders.set(member.discord, ethNftCount.get(member.uid));
-                        discordT.push(member.discord);
                         this.discordToEth.set(member.discord, member.uid);
                     }    
                 });

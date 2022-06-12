@@ -9,6 +9,7 @@ export class NftRoleManager {
     }
 
     updateCurrentHolders() {
+        const chunkSize = 10;
         this.soon.getNftsByCollections(this.collectionIds).then(async (obj) => {
             let ethNftCount = new Map();
             let owner_addresses = new Array();

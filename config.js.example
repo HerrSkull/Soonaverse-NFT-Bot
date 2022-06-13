@@ -27,7 +27,7 @@ const ROLES_TABLE = [ // A table of roles depending on the minimum amount of NFT
 export {API_ADDRESS};
 export {BOT_TOKEN};
 export {WALLET_LIST};
-export {COLLECTION_ID};
+export {COLLECTION_IDS};
 export {GUILD_ID};
 export {GRANT_ROLES_TO_NFT_HOLDERS};
 export {SHOW_TREASURY_INFO};

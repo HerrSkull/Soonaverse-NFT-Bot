@@ -34,8 +34,13 @@ export class NftRoleManager {
                 const members = await this.soon.getMemberByIds(addresses);
                 members.forEach( (member) => {
                     if(member.discord){
-                        nftHolders.set(member.discord, ethNftCount.get(member.uid));
-                        this.discordToEth.set(member.discord, member.uid);
+                        let altNftCount = nftHolders.get(member.discord);
+                        if(altNftCount){
+                            nftHolders.set(member.discord, (ethNftCount.get(member.uid) + altNftCount));
+                        } else {
+                            nftHolders.set(member.discord, ethNftCount.get(member.uid));
+                            this.discordToEth.set(member.discord, member.uid);
+                        }
                     }    
                 });
             }));

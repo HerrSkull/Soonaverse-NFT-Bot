@@ -1,5 +1,5 @@
-const API_ADDRESS = "https://mainnet-node.tanglebay.com/api/v1/addresses/"; // Iota node API to get wallet balance
-const BOT_TOKEN = "YOUR_DISCORD_API_TOKEN"; // Discord-API Bot-Token
+const API_ADDRESS = "https://iota-node.tanglebay.com/api/v1/addresses/"; // Iota node API to get wallet balance
+const BOT_TOKEN = process.env.API_TOKEN; // Discord-API Bot-Token, set it as environment variable "API_TOKEN" or replace process.env.API_TOKEN with "YOUR_API_TOKEN"
 const WALLET_LIST = [
     "YOUR_WALLET_ADDRESS_1",
     "YOUR_WALLET_ADDRESS_2"

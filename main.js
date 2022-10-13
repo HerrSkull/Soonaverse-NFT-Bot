@@ -1,8 +1,10 @@
-import { BOT_TOKEN, COLLECTION_IDS, GUILD_ID, API_ADDRESS, GRANT_ROLES_TO_NFT_HOLDERS, SHOW_TREASURY_INFO, ROLES_TABLE, WALLET_LIST} from "./config.js";
-import { Client, Intents} from "discord.js";
+import { SOONAVERSE_COLLECTION_IDS, SMR_COLLECTION_IDS, GUILD_ID, API_ADDRESS, GRANT_ROLES_TO_NFT_HOLDERS, SHOW_TREASURY_INFO, ROLES_TABLE, WALLET_LIST, SMR_API, USE_SMR_NATIVE_COLLECTIONS, USE_SOONAVERSE_COLLECTIONS, MONGODB_URI} from "./config.js";
+import { Client, Intents } from "discord.js";
 import { Soon } from "soonaverse";
 import  { TreasuryManager } from "./modules/treasuryManager.js";
 import { NftRoleManager } from "./modules/nftRoleManager.js";
+import { SmrNftHolderManager } from "./modules/smrNftHolderManager.js";
+import { DatabaseManager } from "./modules/DatabaseManager.js";
 
 let intents = new Intents(Intents.NON_PRIVILEGED);
 
@@ -15,22 +17,44 @@ const soon = new Soon();
 var interval = 180 * 1000;
 var timeout = 0;
 var treasuryManager = new TreasuryManager(API_ADDRESS, WALLET_LIST);
-var nftRoleManager = new NftRoleManager(COLLECTION_IDS, soon, client, ROLES_TABLE, GUILD_ID);
+var databaseManager = new DatabaseManager(MONGODB_URI);
+var nftRoleManager = new NftRoleManager(client, ROLES_TABLE, GUILD_ID, databaseManager, USE_SOONAVERSE_COLLECTIONS, USE_SMR_NATIVE_COLLECTIONS);
+var smrNftHolderManager = new SmrNftHolderManager(soon, SOONAVERSE_COLLECTION_IDS, SMR_COLLECTION_IDS, SMR_API, databaseManager, USE_SOONAVERSE_COLLECTIONS, USE_SMR_NATIVE_COLLECTIONS);
 
 function round(input){
     return (Math.round((input + Number.EPSILON) * 100) / 100);
 }
 
-function update() {
+async function update() {
     if(timeout > 0){
         setTimeout(update, timeout);
         console.log("TIMEOUT: " + timeout);
         timeout = 0;
     } else {
-        if(GRANT_ROLES_TO_NFT_HOLDERS) { nftRoleManager.updateCurrentHolders() };
+        if(GRANT_ROLES_TO_NFT_HOLDERS) {
+            await smrNftHolderManager.updateNftCount();
+            nftRoleManager.updateRoles();
+        };
         if(SHOW_TREASURY_INFO) { updateAppearance() };
         setTimeout(update, interval);
     }
+}
+
+async function registerSlashCommands(){
+    client.api.applications(client.user.id).guilds(GUILD_ID).commands.post({data: {
+        name: 'registersoonaverseprofile',
+        description: 'Registers the submitted soonaverse profile to enable usage of the rolebot.',
+        type: '1',
+        default_member_permissions: 1,
+        options : [
+            {
+                name : 'ethaddress',
+                description : 'The Metamask address used in your soonaverse profile.',
+                type : 3,
+                require : true
+            }
+        ]
+    }});
 }
 
 
@@ -51,12 +75,22 @@ async function updateAppearance(){
 
 
 client.once("ready", () => {
+    registerSlashCommands();
     ROLES_TABLE.sort((a,b) => {
 		return a.reqNFTs - b.reqNFTs
 	})
     update();
 });
 
+client.on('interactionCreate', async interaction => {
+    if(!interaction.isCommand()) return;
+
+    if(!command) return;
+    if(interaction.commandName === 'registersoonaverseprofile'){
+        let ethaddress = interaction.options.getString("ethaddress", true);
+        await smrNftHolderManager.registerMetamaskAddress(interaction, ethaddress);
+    }
+});
 
 client.on("rateLimit", (limit) => {
     timeout = limit.timeout;

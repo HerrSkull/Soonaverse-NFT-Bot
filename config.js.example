@@ -1,11 +1,15 @@
-const API_ADDRESS = "https://iota-node.tanglebay.com/api/v1/addresses/"; // Iota node API to get wallet balance
+const API_ADDRESS = "https://iotapes.dlt.green/api/v1/addresses/"; // Iota node API to get wallet balance
 const BOT_TOKEN = process.env.API_TOKEN; // Discord-API Bot-Token, set it as environment variable "API_TOKEN" or replace process.env.API_TOKEN with "YOUR_API_TOKEN"
+const MONGODB_URI = process.env.MONGODB_URI; // The connection uri of your mongodb instance
 const WALLET_LIST = [
     "YOUR_WALLET_ADDRESS_1",
     "YOUR_WALLET_ADDRESS_2"
 ]; // A List of Treasury-Wallets
-
-const COLLECTION_IDS = ['YOUR_NFT_COLLECTION_ID1',
+const USE_SMR_NATIVE_COLLECTIONS = false; // Use Smr native nft collections for the rolemanager.
+const SMR_API = "https://iotapes.dlt.builders/"; // Shimmer-Node address
+const SMR_COLLECTION_IDS = []; // The native SMR collection ids (they're not equal to the soonaverse collection ids!)
+const USE_SOONAVERSE_COLLECTIONS = true; // Use soonaverse collections for the rolemanager.
+const SOONAVERSE_COLLECTION_IDS = ['YOUR_NFT_COLLECTION_ID1',
                         'YOUR_NFT_COLLECTION_ID2'
 ]; // Ids of the NFT-Collections on Soonaverse currently maximum 10 supported
 const GUILD_ID = "YOuR_DISCORD_GUILD_ID"; // Id of the discord server
@@ -25,9 +29,13 @@ const ROLES_TABLE = [ // A table of roles depending on the minimum amount of NFT
 ];
 
 export {API_ADDRESS};
-export {BOT_TOKEN};
+export {MONGODB_URI};
+export {USE_SMR_NATIVE_COLLECTIONS};
+export {SMR_API};
+export {SMR_COLLECTION_IDS};
 export {WALLET_LIST};
-export {COLLECTION_IDS};
+export {USE_SOONAVERSE_COLLECTIONS};
+export {SOONAVERSE_COLLECTION_IDS};
 export {GUILD_ID};
 export {GRANT_ROLES_TO_NFT_HOLDERS};
 export {SHOW_TREASURY_INFO};

@@ -1,98 +1,67 @@
 export class NftRoleManager {
-    constructor(collectionIds, soon, client, rolesTable, guildId){
-        this.collectionIds = collectionIds;
-        this.soon = soon;
+    constructor(client, rolesTable, guildId, databaseManager, useSoonaverseNftCount, useSmrNftCount){
         this.client = client;
         this.rolesTable = rolesTable;
-        this.discordToEth = new Map();
         this.guildId = guildId;
+        this.databaseManager = databaseManager;
+        this.useSoonaverseNftCount = useSoonaverseNftCount;
+        this.useSmrNftCount = useSmrNftCount;
     }
 
-    updateCurrentHolders() {
-        const chunkSize = 10;
-        this.soon.getNftsByCollections(this.collectionIds).then(async (obj) => {
-            let ethNftCount = new Map();
-            let owner_addresses = new Array();
-            for(var i = 0; i < obj.length; i++) 
-            {
-                if(owner_addresses.indexOf(obj[i]["owner"]) === -1){
-                    owner_addresses.push(obj[i]["owner"]);
-                    ethNftCount.set(obj[i]["owner"], 1);
-                }
-                else {
-                    ethNftCount.set(obj[i]["owner"], (ethNftCount.get(obj[i]["owner"]) + 1));
-                }
-            }
-            
-            let chunked = new Array();
-            for (let i = 0; i < owner_addresses.length; i += chunkSize) {
-                chunked.push(owner_addresses.slice(i, i + chunkSize));
-            }
-            
-            const nftHolders = new Map();
-            await Promise.all(chunked.map(async (addresses) => {
-                const members = await this.soon.getMemberByIds(addresses);
-                members.forEach( (member) => {
-                    if(member.discord){
-                        let altNftCount = nftHolders.get(member.discord);
-                        if(altNftCount){
-                            nftHolders.set(member.discord, (ethNftCount.get(member.uid) + altNftCount));
-                        } else {
-                            nftHolders.set(member.discord, ethNftCount.get(member.uid));
-                            this.discordToEth.set(member.discord, member.uid);
+    async updateRoles(){
+        const identities = await this.databaseManager.getIdentities();
+        this.client.guilds.fetch(this.guildId).then(async guild => {
+            guild.members.fetch().then(async members => {
+                members.forEach( member => {
+                    let memberRoles = member.roles.cache;
+                    const accounts = identities.filter(e => e.discordtag === member.user.tag);
+                    if (accounts.length > 0) {
+                        let nftCount = 0;
+                        let roleId;
+                        accounts.forEach(account => {
+                            if(this.useSoonaverseNtfCount){
+                                nftCount += account.soonaverseNftCount;
+                            }
+                            if(this.useSmrNftCount){
+                                nftCount += account.smrNftCount;
+                            }
+                        })
+                        for(let j = 0; j < this.rolesTable.length;j++){
+                            if(this.rolesTable[j].reqNFTs == 0 && !member.roles.cache.has(this.rolesTable[j].roleid)){
+                                member.roles.add(this.rolesTable[i].roleid, "NFT-Holder").then((member) => {
+                                    console.log(member.user.tag + " - added generic NFT-Holder-Role; " + this.rolesTable[j].roleid);
+                                })
+                            }
+                            if(this.rolesTable[j].reqNFTs <= nftCount){
+                                roleId = this.rolesTable[j].roleid;
+                            }
                         }
-                    }    
-                });
-            }));
-            syncBatchRoles(this.rolesTable, nftHolders, this.guildId, this.client);
-        });
-    }
-}
 
-function syncBatchRoles(rolesArr, nftHolders, guildId, client){
-    client.guilds.fetch(guildId).then(async (guild) => {
-        guild.members.fetch().then(async (members) => {
-            members.forEach( (member) => {
-                let memberRoles = member.roles.cache;
-                if(nftHolders.has(member.user.tag)){
-                    let nftCount = nftHolders.get(member.user.tag);
-                    let roleId;
-                    for(let i = 0; i < rolesArr.length;i++){
-                        if(rolesArr[i].reqNFTs == 0 && !member.roles.cache.has(rolesArr[i].roleid)){
-                            member.roles.add(rolesArr[i].roleid, "NFT-Holder").then((member) => {
-                                console.log(member.user.tag + " - added generic NFT-Holder-Role; " + rolesArr[i].roleid);
+                        if(!member.roles.cache.has(roleId)){
+                            member.roles.add(roleId, "NFT-Holder").then( (member) => {
+                                console.log(member.user.tag + " - added role: " + roleId);
                             })
                         }
-						if(rolesArr[i].reqNFTs <= nftCount){
-							roleId = rolesArr[i].roleid;
-						}
-					}
-                    
-                    if(!member.roles.cache.has(roleId)){
-                        member.roles.add(roleId, "NFT-Holder").then( (member) => {
-                            console.log(member.user.tag + " - added role: " + roleId);
+                        memberRoles.forEach((role) => {
+                            this.rolesTable.forEach( entry => {
+                                if(role.id == entry.roleid && role.id != roleId && entry.reqNFTs != 0){
+                                    member.roles.remove(entry.roleid);
+                                    console.log(member.user.tag + " - removed role: " + entry.roleid + "   " + roleId);
+                                }
+                            })
+                        })
+                    } else {
+                        memberRoles.forEach((role) => {
+                            this.rolesTable.forEach(entry => {
+                                if(role.id == entry.roleid){
+                                    member.roles.remove(entry.roleid);
+                                    console.log(member.tag.tag + " - removed role: " + entry.roleid);
+                                }
+                            })
                         })
                     }
-                    memberRoles.forEach((role) => {
-                        rolesArr.forEach( entry => {
-                            if(role.id == entry.roleid && role.id != roleId && entry.reqNFTs != 0){
-                                member.roles.remove(entry.roleid);
-                                console.log(member.user.tag + " - removed role: " + entry.roleid);
-                            }
-                        })
-                    })
-                }
-                else {
-                    memberRoles.forEach((role) => {
-                        rolesArr.forEach(entry => {
-                            if(role.id == entry.roleid){
-                                member.roles.remove(entry.roleid);
-                                console.log(member.tag.tag + " - removed role: " + entry.roleid);
-                            }
-                        })
-                    })
-                }
+                })
             })
         })
-    })
+    }
 }

@@ -1,4 +1,4 @@
-import { SOONAVERSE_COLLECTION_IDS, SMR_COLLECTION_IDS, GUILD_ID, API_ADDRESS, GRANT_ROLES_TO_NFT_HOLDERS, SHOW_TREASURY_INFO, ROLES_TABLE, WALLET_LIST, SMR_API, USE_SMR_NATIVE_COLLECTIONS, USE_SOONAVERSE_COLLECTIONS, MONGODB_URI} from "./config.js";
+import { BOT_TOKEN, SOONAVERSE_COLLECTION_IDS, SMR_COLLECTION_IDS, GUILD_ID, API_ADDRESS, GRANT_ROLES_TO_NFT_HOLDERS, SHOW_TREASURY_INFO, ROLES_TABLE, WALLET_LIST, SMR_API, USE_SMR_NATIVE_COLLECTIONS, USE_SOONAVERSE_COLLECTIONS, MONGODB_URI, MONGODB_COLLECTION, MONGODB_DATABASE} from "./config.js";
 import { Client, Intents } from "discord.js";
 import { Soon } from "soonaverse";
 import  { TreasuryManager } from "./modules/treasuryManager.js";
@@ -17,7 +17,7 @@ const soon = new Soon();
 var interval = 180 * 1000;
 var timeout = 0;
 var treasuryManager = new TreasuryManager(API_ADDRESS, WALLET_LIST);
-var databaseManager = new DatabaseManager(MONGODB_URI);
+var databaseManager = new DatabaseManager(MONGODB_URI, MONGODB_DATABASE, MONGODB_COLLECTION);
 var nftRoleManager = new NftRoleManager(client, ROLES_TABLE, GUILD_ID, databaseManager, USE_SOONAVERSE_COLLECTIONS, USE_SMR_NATIVE_COLLECTIONS);
 var smrNftHolderManager = new SmrNftHolderManager(soon, SOONAVERSE_COLLECTION_IDS, SMR_COLLECTION_IDS, SMR_API, databaseManager, USE_SOONAVERSE_COLLECTIONS, USE_SMR_NATIVE_COLLECTIONS);
 

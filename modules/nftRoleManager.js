@@ -28,7 +28,7 @@ export class NftRoleManager {
                         })
                         for(let j = 0; j < this.rolesTable.length;j++){
                             if(this.rolesTable[j].reqNFTs == 0 && !member.roles.cache.has(this.rolesTable[j].roleid)){
-                                member.roles.add(this.rolesTable[i].roleid, "NFT-Holder").then((member) => {
+                                member.roles.add(this.rolesTable[j].roleid, "NFT-Holder").then((member) => {
                                     console.log(member.user.tag + " - added generic NFT-Holder-Role; " + this.rolesTable[j].roleid);
                                 })
                             }

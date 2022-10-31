@@ -1,10 +1,10 @@
 import { chunk, stripPrefix, fromHex } from "./util.js";
 import { Converter } from "@iota/util.js";
 import fetch from "node-fetch";
+import { SoonaverseApiManager } from "./soonaverseApiManager.js";
 
 export class SmrNftHolderManager{
-    constructor(soon, soonaverseCollectionIds, smrCollectionIds, api_endpoint, databaseManager, useSoonaverseCollection, useSmrCollection){
-        this.soon = soon;
+    constructor(soonaverseCollectionIds, smrCollectionIds, api_endpoint, databaseManager, useSoonaverseCollection, useSmrCollection){
         this.soonaverseCollectionIds = soonaverseCollectionIds;
         this.smrCollectionIds = smrCollectionIds;
         this.API_ENDPOINT = api_endpoint;
@@ -15,7 +15,7 @@ export class SmrNftHolderManager{
 
     async registerMetamaskAddress(interaction, MMAddr){
         await interaction.deferReply({ephemeral: true});
-        let soonMembers = await this.soon.getMemberByIds([MMAddr]);
+        let soonMembers = await SoonaverseApiManager.getMemberById(MMAddr);
         if(soonMembers.length === 0){
             await interaction.editReply({content: "Submitted Metamask address is not a soonaverse member!", ephemeral : true});
             return
@@ -37,15 +37,12 @@ export class SmrNftHolderManager{
         identities.forEach(identity => {
             addresses.push(identity.mmAddr);
         })
-        const chunkedAddresses = chunk(addresses, 10);
         let updatedIdentities = new Array();
-        await Promise.all(chunkedAddresses.map(async (profileIds) => {
-            const members = await this.soon.getMemberByIds(profileIds);
-            members.forEach( (member) => {
+        await Promise.all(addresses.map(async (profileId) => {
+            const member = await SoonaverseApiManager.getMemberById(profileId);
                 if(member.discord){
                     updatedIdentities.push({mmAddr: member.uid, discordtag: member.discord});
                 }
-            });
         }));
         await this.databaseManager.updateBulkIdentity(updatedIdentities);
     }
@@ -84,12 +81,9 @@ export class SmrNftHolderManager{
     }
 
     async countSoonaverseNfts(){
-        const chunkSize = 10;
-        let chunkedCollectionIds = chunk(this.soonaverseCollectionIds, chunkSize);
         let ethNftCount = new Map();
-
-        await Promise.all(chunkedCollectionIds.map(async (collectionChunk) => {
-            const nfts = await this.soon.getNftsByCollections(collectionChunk);
+        await Promise.all(this.soonaverseCollectionIds.map(async (collection) => {
+            const nfts = await SoonaverseApiManager.getNftsByCollection(collection);
             for(let i = 0; i < nfts.length; i++) {
                 if(ethNftCount.has(nfts[i]["owner"])){
                     ethNftCount.set(nfts[i]["owner"], 1);

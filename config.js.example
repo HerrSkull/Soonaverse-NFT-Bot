@@ -14,7 +14,7 @@ const USE_SOONAVERSE_COLLECTIONS = true; // Use soonaverse collections for the r
 const SOONAVERSE_COLLECTION_IDS = ['YOUR_NFT_COLLECTION_ID1',
                         'YOUR_NFT_COLLECTION_ID2'
 ]; // Ids of the NFT-Collections on Soonaverse currently maximum 10 supported
-const GUILD_ID = "YOuR_DISCORD_GUILD_ID"; // Id of the discord server
+const GUILD_ID = "YOUR_DISCORD_GUILD_ID"; // Id of the discord server
 const GRANT_ROLES_TO_NFT_HOLDERS = true; // Enable NFT-RoleManager feature
 const SHOW_TREASURY_INFO = false; // Enable treasury as nickname
 const ROLES_TABLE = [ // A table of roles depending on the minimum amount of NFT hold, only role 0 and the highest role is granted

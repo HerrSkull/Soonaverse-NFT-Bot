@@ -33,12 +33,12 @@ export class SmrNftHolderManager{
             addresses.push(identity.mmAddr);
         })
         let updatedIdentities = new Array();
-        await Promise.all(addresses.map(async (profileId) => {
-            const member = await SoonaverseApiManager.getMemberById(profileId);
+        for(let i = 0; i < addresses.length; i++){
+            const member = await SoonaverseApiManager.getMemberById(addresses[i]);
                 if(member.discord){
                     updatedIdentities.push({mmAddr: member.uid, discordtag: member.discord});
                 }
-        }));
+        }
         await this.databaseManager.updateBulkIdentity(updatedIdentities);
     }
 
@@ -77,8 +77,8 @@ export class SmrNftHolderManager{
 
     async countSoonaverseNfts(){
         let ethNftCount = new Map();
-        await Promise.all(this.soonaverseCollectionIds.map(async (collection) => {
-            const nfts = await SoonaverseApiManager.getNftsByCollection(collection);
+        for(let j = 0; j < this.soonaverseCollectionIds.length; j++){
+            const nfts = await SoonaverseApiManager.getNftsByCollection(this.soonaverseCollectionIds[j]);
             for(let i = 0; i < nfts.length; i++) {
                 if(ethNftCount.has(nfts[i]["owner"])){
 					ethNftCount.set(nfts[i]["owner"], (ethNftCount.get(nfts[i]["owner"]) + 1));
@@ -87,7 +87,7 @@ export class SmrNftHolderManager{
                     ethNftCount.set(nfts[i]["owner"], 1);
                 }
             }
-        }));
+        }
         await this.databaseManager.clearSoonaverseNftCount();
         await this.databaseManager.updateBulkSoonaverseNftCount(ethNftCount);     
     }

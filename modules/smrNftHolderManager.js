@@ -86,10 +86,10 @@ export class SmrNftHolderManager{
             const nfts = await SoonaverseApiManager.getNftsByCollection(collection);
             for(let i = 0; i < nfts.length; i++) {
                 if(ethNftCount.has(nfts[i]["owner"])){
-                    ethNftCount.set(nfts[i]["owner"], 1);
+					ethNftCount.set(nfts[i]["owner"], (ethNftCount.get(nfts[i]["owner"]) + 1));
                 }
                 else {
-                    ethNftCount.set(nfts[i]["owner"], (ethNftCount.get(nfts[i]["owner"]) + 1));
+                    ethNftCount.set(nfts[i]["owner"], 1);
                 }
             }
         }));

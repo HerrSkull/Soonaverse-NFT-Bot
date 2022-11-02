@@ -15,12 +15,7 @@ export class SmrNftHolderManager{
 
     async registerMetamaskAddress(interaction, MMAddr){
         await interaction.deferReply({ephemeral: true});
-        let soonMembers = await SoonaverseApiManager.getMemberById(MMAddr);
-        if(soonMembers.length === 0){
-            await interaction.editReply({content: "Submitted Metamask address is not a soonaverse member!", ephemeral : true});
-            return
-        }
-        let soonMember = soonMembers[0]
+        let soonMember = await SoonaverseApiManager.getMemberById(MMAddr);
         let discordTag = interaction.member.user.username + "#" + interaction.member.user.discriminator;
         if(soonMember.discord != discordTag){
             await interaction.editReply({content: "The discordtag of the submitted Soonaverse user does not match your discordtag!"})

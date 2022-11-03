@@ -121,7 +121,7 @@ export class DatabaseManager {
         try{
             const database = this.client.db(this.mongodbDatabase);
             const identities = database.collection(this.mongodbCollection);
-            await identities.updateMany({soonaverseNftCount: { $ne: null}}, { $set: {smrNftCount: 0}});
+            await identities.updateMany({soonaverseNftCount: { $ne: null}}, { $set: {soonaverseNftCount: 0}});
         } finally {
         }
     }

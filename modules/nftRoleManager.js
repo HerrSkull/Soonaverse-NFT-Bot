@@ -55,7 +55,7 @@ export class NftRoleManager {
                             this.rolesTable.forEach(entry => {
                                 if(role.id == entry.roleid){
                                     member.roles.remove(entry.roleid);
-                                    console.log(member.tag.tag + " - removed role: " + entry.roleid);
+                                    console.log(member.user.tag + " - removed role: " + entry.roleid);
                                 }
                             })
                         })

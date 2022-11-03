@@ -10,7 +10,6 @@
   "license": "GPL-3.0",
   "dependencies": {
     "discord.js": "13.6.0",
-    "soonaverse": "^0.1.14",
     "mongodb": "^4.10.0",
     "@iota/util.js": "^1.8.6"
   },

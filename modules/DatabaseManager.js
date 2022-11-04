@@ -59,7 +59,7 @@ export class DatabaseManager {
             const database = this.client.db(this.mongodbDatabase);
             const identities = database.collection(this.mongodbCollection);
             const operations = identityBulk.map((identity) => {
-                return {updateOne:{filter:{mmAddr:identity.mmAddr}, update:{ $set: {discordtag: identity.discordtag}}}, options:{upsert: true}}
+                return {updateOne:{filter:{mmAddr:identity.mmAddr}, update:{ $set: {discordtag: identity.discordtag}}, upsert: true}}
             });
             await identities.bulkWrite(operations);
         } finally {
@@ -83,8 +83,8 @@ export class DatabaseManager {
         try{
             const database = this.client.db(this.mongodbDatabase);
             const identities = database.collection(this.mongodbCollection);
-            const operations = Array.from(ethNftCount).map((ethAddr, nftCount) => {
-                return {updateOne:{filter:{mmAddr:ethAddr}, update:{ $set: {soonaverseNftCount: nftCount}}}, options:{upsert: true}}
+            const operations = Array.from(ethNftCount).map((ethAddrMap) => {
+                return {updateOne:{filter:{mmAddr:ethAddrMap[0]}, update:{ $set: {soonaverseNftCount: ethAddrMap[1]}},upsert: true}}
             });
             await identities.bulkWrite(operations);
         } finally {
@@ -108,8 +108,8 @@ export class DatabaseManager {
         try{
             const database = this.client.db(this.mongodbDatabase);
             const identities = database.collection(this.mongodbCollection);
-            const operations = Array.from(smrNftCount).map((smrAddr, nftCount) => {
-                return {updateOne:{filter:{smrAddr:smrAddr}, update:{ $set: {smrNftCount: nftCount}}}, options:{upsert: true}}
+            const operations = Array.from(smrNftCount).map((smrAddrMap) => {
+                return {updateOne:{filter:{smrAddr:smrAddrMap[0]}, update:{ $set: {smrNftCount: smrAddrMap[1]}}, upsert: true}}
             });
             await identities.bulkWrite(operations);
         } finally {

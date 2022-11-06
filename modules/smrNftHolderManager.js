@@ -30,7 +30,9 @@ export class SmrNftHolderManager{
         const identities = await this.databaseManager.getIncompleteIdentities();
         const addresses = new Array();
         identities.forEach(identity => {
-            addresses.push(identity.mmAddr);
+            if(identity.mmAddr != null){
+                addresses.push(identity.mmAddr);
+            }
         })
         let updatedIdentities = new Array();
         for(let i = 0; i < addresses.length; i++){

@@ -19,7 +19,7 @@ export class NftRoleManager {
                         let nftCount = 0;
                         let roleId;
                         accounts.forEach(account => {
-                            if(this.useSoonaverseNtfCount){
+                            if(this.useSoonaverseNftCount){
                                 nftCount += account.soonaverseNftCount;
                             }
                             if(this.useSmrNftCount){

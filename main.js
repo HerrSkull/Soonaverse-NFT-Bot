@@ -29,12 +29,20 @@ async function update() {
         console.log("TIMEOUT: " + timeout);
         timeout = 0;
     } else {
-        if(GRANT_ROLES_TO_NFT_HOLDERS) {
-            await smrNftHolderManager.updateNftCount();
-            nftRoleManager.updateRoles();
-        };
-        if(SHOW_TREASURY_INFO) { updateAppearance() };
-        setTimeout(update, interval);
+        try{
+            if(GRANT_ROLES_TO_NFT_HOLDERS) {
+                console.log("updating nftcounter..\r\n");
+                await smrNftHolderManager.updateNftCount();
+                console.log("finished updating nftcounter!\r\n");
+                nftRoleManager.updateRoles();
+                console.log("roles updated!");
+                if(SHOW_TREASURY_INFO) { 
+                    updateAppearance()
+                }
+            }
+        } finally {
+            setTimeout(update, interval);
+        }
     }
 }
 

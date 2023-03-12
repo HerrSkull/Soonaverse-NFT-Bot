@@ -92,7 +92,7 @@ client.on('interactionCreate', async interaction => {
     if(!interaction.isCommand()) return;
     if(interaction.commandName === 'registersoonaverseprofile'){
         let ethaddress = interaction.options.getString("ethaddress", true);
-        await smrNftHolderManager.registerMetamaskAddress(interaction, ethaddress);
+        await smrNftHolderManager.registerMetamaskAddress(interaction, ethaddress.toLowerCase());
     }
 });
 

@@ -20,10 +20,10 @@ export class NftRoleManager {
                         let roleId;
                         accounts.forEach(account => {
                             if(this.useSoonaverseNftCount){
-                                nftCount += account.soonaverseNftCount;
+                                nftCount += account.soonaverseNftCount || 0;
                             }
                             if(this.useSmrNftCount){
-                                nftCount += account.smrNftCount;
+                                nftCount += account.smrNftCount || 0;
                             }
                         })
                         for(let j = 0; j < this.rolesTable.length;j++){

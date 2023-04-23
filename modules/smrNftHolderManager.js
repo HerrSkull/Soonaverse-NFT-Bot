@@ -2,6 +2,7 @@ import { chunk, stripPrefix, fromHex } from "./util.js";
 import { Converter } from "@iota/util.js";
 import fetch from "node-fetch";
 import { SoonaverseApiManager } from "./soonaverseApiManager.js";
+import { Bech32Helper, ED25519_ADDRESS_TYPE } from "@iota/iota.js-stardust";
 
 export class SmrNftHolderManager{
     constructor(soonaverseCollectionIds, smrCollectionIds, api_endpoint, databaseManager, useSoonaverseCollection, useSmrCollection){
@@ -11,6 +12,7 @@ export class SmrNftHolderManager{
         this.databaseManager = databaseManager;
         this.useSoonaverseCollection = useSoonaverseCollection;
         this.useSmrCollection = useSmrCollection;
+        this.smrIssuerAddresses = ["smr1qr5tw7cprnx2cf46uztkvu5vddgayh8g9c3t7c0q2q4g9m50vgph58zmqm6"];
     }
 
     async registerMetamaskAddress(interaction, MMAddr){
@@ -55,26 +57,27 @@ export class SmrNftHolderManager{
     }
 
     async countSmrNfts(){
-        const identities = await this.databaseManager.getMMSmrAddressPairs(); 
+        const identities = await this.databaseManager.getMMSmrAddressPairs();
         let smrNftCount = new Map();
-        
-        await Promise.all(identities.map(async identity => {
-            const smrAddress = identity.smrAddr;
-            const nfts = await this.getSmrNftsOfAddress(smrAddress);
-            
-            await Promise.all(nfts.map(async nftOutput => {
-                const nftDetails = await this.getSmrNftDetails(nftOutput);
-                if(this.smrCollectionIds.indexOf(nftDetails.collectionId) != -1){
-                    if(smrNftCount.has(smrAddress)){
-                        smrNftCount.set(smrAddress, 1);
+        await Promise.all(this.smrIssuerAddresses.map(async issuerAddress => {
+            const nftOutputs = await this.getSmrNftsByIssuer(issuerAddress);
+            for(let i = 0; i < nftOutputs.length; i++){
+                const nftDetails = await this.getSmrNftDetails(nftOutputs[i]);
+                //encode unlockaddress bech32
+                // nft owned by wallet
+                if(nftDetails.output.unlockConditions[0].address.type === 0){
+                    const bech32Addr = Bech32Helper.toBech32(ED25519_ADDRESS_TYPE, Converter.hexToBytes(stripPrefix(nftDetails.output.unlockConditions[0].address.pubKeyHash)), "smr")
+                    if(!smrNftCount.has(bech32Addr)){
+                        smrNftCount.set(bech32Addr, 1);
+                    } else {
+                        console.log(smrNftCount);
+                        smrNftCount.set(bech32Addr, (smrNftCount.get(bech32Addr) + 1));
+                        console.log(smrNftCount);
                     }
-                    else {
-                        smrNftCount.set(smrAddress, (smrNftCount.get(smrAddress) + 1));
-                    }
-                }
-            }))
+                } //nft owned by nft
+            }
         }))
-        await this.databaseManager.updateBulkSmrNftCount(smrNftCount);
+        await this.databaseManager.updateBulkSmrNftCount(smrNftCount)
     }
 
     async countSoonaverseNfts(){
@@ -101,11 +104,66 @@ export class SmrNftHolderManager{
                 const data = isJson ? await res.json() : null;
     
                 if (!res.ok) {
+                    const err = (data && data.message) || res.status;s
+                    return Promise.reject(err);
+                }
+            
+                return data.items
+            })
+            .catch(error => {
+                console.log(error);
+                return Promise.reject(error);
+            })
+    }
+
+    async getSmrNftsByIssuer(issuerAddress) {
+        return fetch(this.API_ENDPOINT + "api/indexer/v1/outputs/nft?issuer=" + issuerAddress)
+            .then(async res => {
+                const isJson = res.headers.get('content-type')?.includes('application/json');
+                const data = isJson ? await res.json() : null;
+    
+                if (!res.ok) {
                     const err = (data && data.message) || res.status;
                     return Promise.reject(err);
                 }
             
                 return data.items
+            })
+            .catch(error => {
+                console.log(error);
+                return Promise.reject(error);
+            })
+    }
+
+    async getSmrNftMetadata(outputAddress){
+        return fetch(this.API_ENDPOINT + "api/core/v2/outputs/" + outputAddress)
+            .then(async res => {
+                const isJson = res.headers.get('content-type')?.includes('application/json');
+                const data = isJson ? await res.json() : null;
+    
+                if (!res.ok) {
+                    const err = (data && data.message) || res.status;
+                    return Promise.reject(err);
+                }
+                return JSON.parse(Converter.hexToUtf8(stripPrefix(data.output.immutableFeatures[1].data)));
+            })
+            .catch(error => {
+                console.log(error);
+                return Promise.reject(error);
+            })
+    }
+
+    async getNftOwner(outputAddress){
+        return fetch(this.API_ENDPOINT + "api/core/v2/outputs/" + outputAddress)
+            .then(async res => {
+                const isJson = res.headers.get('content-type')?.includes('application/json');
+                const data = isJson ? await res.json() : null;
+    
+                if (!res.ok) {
+                    const err = (data && data.message) || res.status;
+                    return Promise.reject(err);
+                }
+                return JSON.parse(Converter.hexToUtf8(stripPrefix(data.output.unlockConditions.data)));
             })
             .catch(error => {
                 console.log(error);
@@ -123,7 +181,7 @@ export class SmrNftHolderManager{
                     const err = (data && data.message) || res.status;
                     return Promise.reject(err);
                 }
-                return JSON.parse(Converter.hexToUtf8(stripPrefix(data.output.immutableFeatures[1].data)));
+                return data;
             })
             .catch(error => {
                 console.log(error);

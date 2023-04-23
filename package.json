@@ -9,9 +9,10 @@
   "author": "HerrSkull",
   "license": "GPL-3.0",
   "dependencies": {
+    "@iota/iota.js-stardust": "npm:@iota/iota.js@^2.0.0-rc.1",
+    "@iota/util.js": "^1.8.6",
     "discord.js": "13.6.0",
-    "mongodb": "^4.10.0",
-    "@iota/util.js": "^1.8.6"
+    "mongodb": "^4.10.0"
   },
   "type": "module"
 }

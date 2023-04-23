@@ -109,7 +109,7 @@ export class DatabaseManager {
             const database = this.client.db(this.mongodbDatabase);
             const identities = database.collection(this.mongodbCollection);
             const operations = Array.from(smrNftCount).map((smrAddrMap) => {
-                return {updateOne:{filter:{smrAddr:smrAddrMap[0]}, update:{ $set: {smrNftCount: smrAddrMap[1]}}, upsert: true}}
+                return {updateOne:{filter:{smrAddr:smrAddrMap[0]}, update:{ $set: {smrNftCount: smrAddrMap[1]}}, upsert: false}}
             });
             await identities.bulkWrite(operations);
         } finally {

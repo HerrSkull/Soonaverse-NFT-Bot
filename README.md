@@ -1,4 +1,4 @@
-# Soonaverse-NFT-Bot v1.2
+# Soonaverse-NFT-Bot v1.3
 
 Features
 * Track funds of a list of Wallets
@@ -15,6 +15,11 @@ Discord Bot permissions requirements:
 * Applications.commands scope
 * Bot role needs to be ranked above the role it assigns
 * If the server admin account is 2FA enabled, the botowner account needs to be too
+
+Changelog v1.3:
+* Added Shimmer EVM support
+* Updated Discordtag changes
+* Changed Soonaverse-API to Build5-API
 
 Changelog v1.2:
 * Shimmer native nft support added

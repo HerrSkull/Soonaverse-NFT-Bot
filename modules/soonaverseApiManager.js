@@ -1,17 +1,22 @@
 import fetch from "node-fetch";
 
-const API_ENDPOINT = "https://soonaverse.com/api/";
+const API_ENDPOINT = "https://api.build5.com/api/";
 
 export class SoonaverseApiManager{
 
-    constructor(){
-
+    constructor(API_KEY){
+        this.API_KEY = API_KEY;
     }
     
-    static async getNftsByCollection(collectionId){
+    async getNftsByCollection(collectionId){
 		return new Promise( (resolve, reject) => {
 			let results = new Array();
-			fetch(API_ENDPOINT + "getMany?collection=nft&fieldName=collection&fieldValue=" + collectionId)
+			fetch(API_ENDPOINT + "getMany?collection=nft&fieldName=collection&fieldValue=" + collectionId,{
+                method: 'get',
+                headers: new Headers({
+                    'Authorization': 'Bearer ' + this.API_KEY
+                })
+            })
 			.then(async res => {
                 const isJson = res.headers.get('content-type')?.includes('application/json');
                 const data = isJson ? await res.json() : null;
@@ -35,8 +40,13 @@ export class SoonaverseApiManager{
 		})
     }
 	
-	static async getNftsByCollectionPage(collectionId, startAfter){
-        return fetch(API_ENDPOINT + "getMany?collection=nft&fieldName=collection&fieldValue=" + collectionId + "&startAfter=" + startAfter)
+	async getNftsByCollectionPage(collectionId, startAfter){
+        return fetch(API_ENDPOINT + "getMany?collection=nft&fieldName=collection&fieldValue=" + collectionId + "&startAfter=" + startAfter,{
+            method: 'get',
+            headers: new Headers({
+                'Authorization': 'Bearer ' + this.API_KEY
+            })
+        })
             .then(async res => {
                 const isJson = res.headers.get('content-type')?.includes('application/json');
                 const data = isJson ? await res.json() : null;
@@ -53,8 +63,13 @@ export class SoonaverseApiManager{
             })
     }
     
-    static async getMemberById(memberId){
-        return fetch(API_ENDPOINT + "getById?collection=member&uid=" + memberId)
+    async getMemberById(memberId){
+        return fetch(API_ENDPOINT + "getById?collection=member&uid=" + memberId,{
+            method: 'get',
+            headers: new Headers({
+                'Authorization': 'Bearer ' + this.API_KEY
+            })
+        })
             .then(async res => {
                 const isJson = res.headers.get('content-type')?.includes('application/json');
                 const data = isJson ? await res.json() : null;

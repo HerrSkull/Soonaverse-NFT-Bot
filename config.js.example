@@ -9,11 +9,11 @@ const WALLET_LIST = [
 ]; // A List of Treasury-Wallets
 const USE_SMR_NATIVE_COLLECTIONS = false; // Use Smr native nft collections for the rolemanager.
 const SMR_API = "https://iotapes.dlt.builders/"; // Shimmer-Node address
-const SMR_COLLECTION_IDS = []; // The native SMR collection ids (they're not equal to the soonaverse collection ids!)
+const SMR_COLLECTION_IDS = []; // The native SMR collection ids (they're not equal to soonaverse collection ids!)
 const USE_SOONAVERSE_COLLECTIONS = true; // Use soonaverse collections for the rolemanager.
 const SOONAVERSE_COLLECTION_IDS = ['YOUR_NFT_COLLECTION_ID1',
                         'YOUR_NFT_COLLECTION_ID2'
-]; // Ids of the NFT-Collections on Soonaverse currently maximum 10 supported
+]; // Ids of the NFT-Collections on Soonaverse
 const GUILD_ID = "YOUR_DISCORD_GUILD_ID"; // Id of the discord server
 const GRANT_ROLES_TO_NFT_HOLDERS = true; // Enable NFT-RoleManager feature
 const SHOW_TREASURY_INFO = false; // Enable treasury as nickname
@@ -29,6 +29,12 @@ const ROLES_TABLE = [ // A table of roles depending on the minimum amount of NFT
     {roleid : "968143214483742740", reqNFTs : 17},
     {roleid : "968143256938483752", reqNFTs : 21}
 ];
+const USE_SMREVM_COLLECTIONS = true;
+const SMR_EVM_CONTRACTS = [
+    "0xf640ed4ADFD525a3DEae9FA76a840898d61009C1",
+    "0x3F5ae5270b404fF94BB4d2f15A4f3b46f16470D1"
+];
+const REGISTER_APPLICATION_COMMANDS = true;
 
 export {API_ADDRESS};
 export {BOT_TOKEN};
@@ -45,3 +51,6 @@ export {GUILD_ID};
 export {GRANT_ROLES_TO_NFT_HOLDERS};
 export {SHOW_TREASURY_INFO};
 export {ROLES_TABLE};
+export {USE_SMREVM_COLLECTIONS};
+export {SMR_EVM_CONTRACTS};
+export {REGISTER_APPLICATION_COMMANDS};

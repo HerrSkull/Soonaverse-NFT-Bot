@@ -25,7 +25,7 @@ export class DatabaseManager {
             const database = this.client.db(this.mongodbDatabase);
             const identities = database.collection(this.mongodbCollection);
             const query = { discordtag: { $eq: null }};
-            const cursor = identities.find(query).project({mmAddr: 1, _id: 0});
+            const cursor = identities.find(query).project({soonaverseID: 1, _id: 0});
             return await cursor.toArray(); 
         } finally {
         }
@@ -46,7 +46,7 @@ export class DatabaseManager {
         try{
             const database = this.client.db(this.mongodbDatabase);
             const identities = database.collection(this.mongodbCollection);
-            await identities.updateOne({mmAddr: identity.mmAddr}, { $set: {discordtag: identity.discordtag, smrAddr: identity.smrAddr}}, { upsert: true })
+            await identities.updateOne({soonaverseID: identity.soonaverseID}, { $set: {discordtag: identity.discordtag, smrAddr: identity.smrAddr, iotaAddr: identity.iotaAddr}}, { upsert: true })
         } finally {
         }
     }
@@ -59,7 +59,7 @@ export class DatabaseManager {
             const database = this.client.db(this.mongodbDatabase);
             const identities = database.collection(this.mongodbCollection);
             const operations = identityBulk.map((identity) => {
-                return {updateOne:{filter:{mmAddr:identity.mmAddr}, update:{ $set: {discordtag: identity.discordtag}}, upsert: true}}
+                return {updateOne:{filter:{soonaverseID:identity.soonaverseID}, update:{ $set: {discordtag: identity.discordtag}}, upsert: true}}
             });
             await identities.bulkWrite(operations);
         } finally {
@@ -67,24 +67,24 @@ export class DatabaseManager {
         }
     }
 
-    async updateSoonaverseNftCount(mmAddr, nftCount){
+    async updateSoonaverseNftCount(soonaverseID, nftCount){
         try{
             const database = this.client.db(this.mongodbDatabase);
             const identities = database.collection(this.mongodbCollection);
-            await identities.updateOne({mmAddr: mmAddr}, { $set: {soonaverseNftCount: nftCount}}, { upsert: true })
+            await identities.updateOne({soonaverseID: soonaverseID}, { $set: {soonaverseNftCount: nftCount}}, { upsert: true })
         } finally {
         }
     }
 
-    async updateBulkSoonaverseNftCount(ethNftCount){
-        if(ethNftCount.size === 0){
+    async updateBulkSoonaverseNftCount(soonaverseNftCount){
+        if(soonaverseNftCount.size === 0){
             return
         }
         try{
             const database = this.client.db(this.mongodbDatabase);
             const identities = database.collection(this.mongodbCollection);
-            const operations = Array.from(ethNftCount).map((ethAddrMap) => {
-                return {updateOne:{filter:{mmAddr:ethAddrMap[0]}, update:{ $set: {soonaverseNftCount: ethAddrMap[1]}},upsert: true}}
+            const operations = Array.from(soonaverseNftCount).map((soonaverseIDMap) => {
+                return {updateOne:{filter:{soonaverseID:soonaverseIDMap[0]}, update:{ $set: {soonaverseNftCount: soonaverseIDMap[1]}},upsert: true}}
             });
             await identities.bulkWrite(operations);
         } finally {
@@ -122,6 +122,21 @@ export class DatabaseManager {
             const database = this.client.db(this.mongodbDatabase);
             const identities = database.collection(this.mongodbCollection);
             await identities.updateMany({soonaverseNftCount: { $ne: null}}, { $set: {soonaverseNftCount: 0}});
+        } finally {
+        }
+    }
+
+    async updateBulksevmNftCount(sevmNftCount){
+        if(sevmNftCount.size === 0){
+            return
+        }
+        try{
+            const database = this.client.db(this.mongodbDatabase);
+            const identities = database.collection(this.mongodbCollection);
+            const operations = Array.from(sevmNftCount).map((sevmAddrMap) => {
+                return {updateOne:{filter:{soonaverseID:sevmAddrMap[0]}, update:{ $set: {sevmNftCount: sevmAddrMap[1]}}, upsert: false}}
+            });
+            await identities.bulkWrite(operations);
         } finally {
         }
     }
